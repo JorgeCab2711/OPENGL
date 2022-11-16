@@ -22,7 +22,7 @@ class App:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK,
                                     pg.GL_CONTEXT_PROFILE_CORE)
-        pg.display.set_mode((640, 480), pg.OPENGL | pg.DOUBLEBUF)
+        pg.display.set_mode((1080, 720), pg.OPENGL | pg.DOUBLEBUF)
         self.clock = pg.time.Clock()
         # initialise opengl
         glClearColor(0.1, 0.2, 0.2, 1)
@@ -38,7 +38,7 @@ class App:
         self.cube = Cube(position, eulers)
 
         projection_transform = pyrr.matrix44.create_perspective_projection(
-            fovy=45, aspect=640/480,
+            fovy=45, aspect=1080/720,
             near=0.1, far=10, dtype=np.float32
         )
         glUniformMatrix4fv(
@@ -111,10 +111,11 @@ class App:
             if(arrow_right):
                 self.cube.eulers[2] -= 1
 
-            # if self.cube.eulers[0] > 360 or self.cube.eulers[0] < -360:
-            #     self.cube.eulers[0] = 0
-            # elif self.cube.eulers[2] > 360 or self.cube.eulers[2] < -360:
-            #     self.cube.eulers[2] = 0
+            # reseting variables for memory efficiency
+            if self.cube.eulers[0] > 360 or self.cube.eulers[0] < -360:
+                self.cube.eulers[0] = 0
+            elif self.cube.eulers[2] > 360 or self.cube.eulers[2] < -360:
+                self.cube.eulers[2] = 0
 
             # update cube
             # self.cube.eulers[2] += 0.25
@@ -283,6 +284,25 @@ class Material:
         glDeleteTextures(1, (self.texture,))
 
 
-position = [0, -0.3, -3],
+position = [0, -0.3, -3]
 eulers = [0, 0, 0]
-myApp = App("models\Tiger2.obj", "models\gold.jpg", position, eulers)
+
+model = ""
+texture = ""
+
+print("Modelos: \n[1] TIGER_TANK \n[2] Mask \n[3] Eyeball")
+model_option = int(input("Seleccione el modelo que desea cargar: \n"))
+if model_option == 1:
+    model = "models\Tiger2.obj"
+    texture = "models\Texture\\tiger.bmp"
+
+if model_option == 2:
+    model = "models\mask.obj"
+    texture = "models\Texture\Steve.png"
+    position = [0, -0.5, -4]
+
+if model_option == 3:
+    model = "models\eyeball.obj"
+    texture = "models\Texture\Eye_D.jpg"
+    position = [0, -0.5, -10]
+myApp = App(model, texture, position, eulers)
