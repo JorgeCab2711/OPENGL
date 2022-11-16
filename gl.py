@@ -14,7 +14,8 @@ class Cube:
 
 
 class App:
-    def __init__(self):
+    # Model OBJ, texture IMAGE FORMAT ,  position [x,y,z], eulers/rotation [x,y,z]
+    def __init__(self, model: str, texture: str, position, eulers):
         # initialise pygame
         pg.init()
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
@@ -23,24 +24,18 @@ class App:
                                     pg.GL_CONTEXT_PROFILE_CORE)
         pg.display.set_mode((640, 480), pg.OPENGL | pg.DOUBLEBUF)
         self.clock = pg.time.Clock()
-
-        self.cube_mesh = CubeMesh()
-
         # initialise opengl
         glClearColor(0.1, 0.2, 0.2, 1)
-
+        self.cube_mesh = Mesh(model)
         self.shader = self.createShader(
             "Shaders/vertex.txt", "Shaders/fragment.txt")
         glUseProgram(self.shader)
         glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
         glEnable(GL_DEPTH_TEST)
 
-        self.wood_texture = Material("Textures\wood.png")
+        self.wood_texture = Material(texture)
 
-        self.cube = Cube(
-            position=[0, 0, -3],
-            eulers=[0, 0, 0]
-        )
+        self.cube = Cube(position, eulers)
 
         projection_transform = pyrr.matrix44.create_perspective_projection(
             fovy=45, aspect=640/480,
@@ -67,28 +62,71 @@ class App:
         return shader
 
     def mainLoop(self):
+
+        # arrow variables for key bindings
+        arrow_down = False
+        arrow_Up = False
+        arrow_left = False
+        arrow_right = False
+
         running = True
         while (running):
             # check events
             for event in pg.event.get():
+                # Key down for movement
+                if(event.type == pg.KEYDOWN):
+                    if event.key == pg.K_DOWN:
+                        arrow_down = True
+
+                    if event.key == pg.K_UP:
+                        arrow_Up = True
+
+                    if event.key == pg.K_LEFT:
+                        arrow_left = True
+
+                    if event.key == pg.K_RIGHT:
+                        arrow_right = True
+                # key up for stoping movement
+                elif(event.type == pg.KEYUP):
+                    if event.key == pg.K_DOWN:
+                        arrow_down = False
+
+                    if event.key == pg.K_UP:
+                        arrow_Up = False
+
+                    if event.key == pg.K_LEFT:
+                        arrow_left = False
+
+                    if event.key == pg.K_RIGHT:
+                        arrow_right = False
                 if (event.type == pg.QUIT):
                     running = False
 
+            if(arrow_down):
+                self.cube.eulers[0] -= 1
+            if(arrow_Up):
+                self.cube.eulers[0] += 1
+            if(arrow_left):
+                self.cube.eulers[2] += 1
+            if(arrow_right):
+                self.cube.eulers[2] -= 1
+
+            # if self.cube.eulers[0] > 360 or self.cube.eulers[0] < -360:
+            #     self.cube.eulers[0] = 0
+            # elif self.cube.eulers[2] > 360 or self.cube.eulers[2] < -360:
+            #     self.cube.eulers[2] = 0
+
             # update cube
-            self.cube.eulers[2] += 0.25
-            if self.cube.eulers[2] > 360:
-                self.cube.eulers[2] -= 360
+            # self.cube.eulers[2] += 0.25
+            # if self.cube.eulers[2] > 360:
+            #     self.cube.eulers[2] -= 360
 
             # refresh screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glUseProgram(self.shader)
 
             model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
-            """
-                pitch: rotation around x axis
-                roll:rotation around z axis
-                yaw: rotation around y axis
-            """
+
             model_transform = pyrr.matrix44.multiply(
                 m1=model_transform,
                 m2=pyrr.matrix44.create_from_eulers(
@@ -120,59 +158,11 @@ class App:
         pg.quit()
 
 
-class CubeMesh:
-    def __init__(self):
-        # x, y, z, s, t
-        self.vertices = (
-            -0.5, -0.5, -0.5, 0, 0,
-            0.5, -0.5, -0.5, 1, 0,
-            0.5,  0.5, -0.5, 1, 1,
-
-            0.5,  0.5, -0.5, 1, 1,
-            -0.5,  0.5, -0.5, 0, 1,
-            -0.5, -0.5, -0.5, 0, 0,
-
-            -0.5, -0.5,  0.5, 0, 0,
-            0.5, -0.5,  0.5, 1, 0,
-            0.5,  0.5,  0.5, 1, 1,
-
-            0.5,  0.5,  0.5, 1, 1,
-            -0.5,  0.5,  0.5, 0, 1,
-            -0.5, -0.5,  0.5, 0, 0,
-
-            -0.5,  0.5,  0.5, 1, 0,
-            -0.5,  0.5, -0.5, 1, 1,
-            -0.5, -0.5, -0.5, 0, 1,
-
-            -0.5, -0.5, -0.5, 0, 1,
-            -0.5, -0.5,  0.5, 0, 0,
-            -0.5,  0.5,  0.5, 1, 0,
-
-            0.5,  0.5,  0.5, 1, 0,
-            0.5,  0.5, -0.5, 1, 1,
-            0.5, -0.5, -0.5, 0, 1,
-
-            0.5, -0.5, -0.5, 0, 1,
-            0.5, -0.5,  0.5, 0, 0,
-            0.5,  0.5,  0.5, 1, 0,
-
-            -0.5, -0.5, -0.5, 0, 1,
-            0.5, -0.5, -0.5, 1, 1,
-            0.5, -0.5,  0.5, 1, 0,
-
-            0.5, -0.5,  0.5, 1, 0,
-            -0.5, -0.5,  0.5, 0, 0,
-            -0.5, -0.5, -0.5, 0, 1,
-
-            -0.5,  0.5, -0.5, 0, 1,
-            0.5,  0.5, -0.5, 1, 1,
-            0.5,  0.5,  0.5, 1, 0,
-
-            0.5,  0.5,  0.5, 1, 0,
-            -0.5,  0.5,  0.5, 0, 0,
-            -0.5,  0.5, -0.5, 0, 1
-        )
-        self.vertex_count = len(self.vertices)//5
+class Mesh:
+    def __init__(self, filename):
+        # x, y, z, s, t, nx, ny, nz
+        self.vertices = self.loadMesh(filename)
+        self.vertex_count = len(self.vertices)//8
         self.vertices = np.array(self.vertices, dtype=np.float32)
 
         self.vao = glGenVertexArrays(1)
@@ -181,13 +171,88 @@ class CubeMesh:
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, self.vertices.nbytes,
                      self.vertices, GL_STATIC_DRAW)
-
+        # position
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(0))
-
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
+        # texture
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
-                              20, ctypes.c_void_p(12))
+                              32, ctypes.c_void_p(12))
+
+    def loadMesh(self, filename):
+
+        # raw, unassembled data
+        v = []
+        vt = []
+        vn = []
+
+        # final, assembled and packed result
+        vertices = []
+
+        # open the obj file and read the data
+        with open(filename, 'r') as f:
+            line = f.readline()
+            while line:
+                firstSpace = line.find(" ")
+                flag = line[0:firstSpace]
+                if flag == "v":
+                    # vertex
+                    line = line.replace("v ", "")
+                    line = line.split(" ")
+                    l = [float(x) for x in line]
+                    v.append(l)
+                elif flag == "vt":
+                    # texture coordinate
+                    line = line.replace("vt ", "")
+                    line = line.split(" ")
+                    l = [float(x) for x in line]
+                    vt.append(l)
+                elif flag == "vn":
+                    # normal
+                    line = line.replace("vn ", "")
+                    line = line.split(" ")
+                    l = [float(x) for x in line]
+                    vn.append(l)
+                elif flag == "f":
+                    # face, three or more vertices in v/vt/vn form
+                    line = line.replace("f ", "")
+                    line = line.replace("\n", "")
+                    # get the individual vertices for each line
+                    line = line.split(" ")
+                    faceVertices = []
+                    faceTextures = []
+                    faceNormals = []
+                    for vertex in line:
+                        # break out into [v,vt,vn],
+                        # correct for 0 based indexing.
+                        l = vertex.split("/")
+                        position = int(l[0]) - 1
+                        faceVertices.append(v[position])
+                        texture = int(l[1]) - 1
+                        faceTextures.append(vt[texture])
+                        normal = int(l[2]) - 1
+                        faceNormals.append(vn[normal])
+                    # obj file uses triangle fan format for each face individually.
+                    # unpack each face
+                    triangles_in_face = len(line) - 2
+
+                    vertex_order = []
+                    """
+                        eg. 0,1,2,3 unpacks to vertices: [0,1,2,0,2,3]
+                    """
+                    for i in range(triangles_in_face):
+                        vertex_order.append(0)
+                        vertex_order.append(i+1)
+                        vertex_order.append(i+2)
+                    for i in vertex_order:
+                        for x in faceVertices[i]:
+                            vertices.append(x)
+                        for x in faceTextures[i]:
+                            vertices.append(x)
+                        for x in faceNormals[i]:
+                            vertices.append(x)
+                line = f.readline()
+        return vertices
 
     def destroy(self):
         glDeleteVertexArrays(1, (self.vao,))
@@ -218,4 +283,6 @@ class Material:
         glDeleteTextures(1, (self.texture,))
 
 
-myApp = App()
+position = [0, -0.3, -3],
+eulers = [0, 0, 0]
+myApp = App("models\Tiger2.obj", "models\gold.jpg", position, eulers)
