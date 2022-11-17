@@ -294,12 +294,12 @@ print("Modelos: \n[1] TIGER_TANK \n[2] Mask \n[3] Eyeball")
 model_option = int(input("Seleccione el modelo que desea cargar: \n"))
 if model_option == 1:
     model = "models\Tiger2.obj"
-    texture = "models\Texture\\tiger.bmp"
+    texture = "models\Texture\Tiger.png"
 
 if model_option == 2:
     model = "models\mask.obj"
     texture = "models\Texture\Steve.png"
-    position = [0, -0.5, -4]
+    position = [0, -1, -4]
 
 if model_option == 3:
     model = "models\eyeball.obj"
