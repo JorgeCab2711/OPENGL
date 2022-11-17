@@ -1,0 +1,191 @@
+# Blender MTL File: '76mm.blend'
+# Material Count: 15
+
+newmtl Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\1\\Material_Normal_OpenGL.png
+map_Ns Texture\\1\\Material_Roughness.png
+refl Texture\\1\\Material_Metallic.png
+
+newmtl Material.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\2\\(null)_Normal_OpenGL.png
+map_Ns Texture\\2\\(null)_Roughness.png
+refl Texture\\2\\(null)_Metallic.png
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\3\\None_Normal_OpenGL.png
+map_Ns Texture\\3\\None_Roughness.png
+refl Texture\\3\\None_Metallic.png
+
+newmtl Material.003
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\4\\None_Normal_OpenGL.png
+map_Ns Texture\\4\\None_Roughness.png
+refl Texture\\4\\None_Metallic.png
+
+newmtl Material.005
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\5\\None_Normal_OpenGL.png
+map_Ns Texture\\5\\None_Roughness.png
+refl Texture\\5\\None_Metallic.png
+
+newmtl Material.006
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\6\\None_Normal_OpenGL.png
+map_Ns Texture\\6\\None_Roughness.png
+refl Texture\\6\\None_Metallic.png
+
+newmtl Material.007
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\7\\None_Normal_OpenGL.png
+map_Ns Texture\\7\\None_Roughness.png
+refl Texture\\7\\None_Metallic.png
+
+newmtl Material.008
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 1.000000 Texture\\8\\None_Normal_OpenGL.png
+map_Ns Texture\\8\\None_Roughness.png
+refl Texture\\8\\None_Metallic.png
+
+newmtl Material.009
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\9\\None_Normal_OpenGL.png
+map_Ns Texture\\9\\None_Roughness.png
+refl Texture\\9\\None_Metallic.png
+
+newmtl Material.011
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\12\\None_Normal_OpenGL.png
+map_Ns Texture\\12\\None_Roughness.png
+refl Texture\\12\\None_Metallic.png
+
+newmtl Material.012
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\13\\None_Normal_OpenGL.png
+map_Ns Texture\\13\\None_Roughness.png
+refl Texture\\13\\None_Metallic.png
+
+newmtl Material.013
+Ns 359.999993
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl Material.014
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\10\\None_Normal_OpenGL.png
+map_Ns Texture\\10\\None_Roughness.png
+refl Texture\\10\\None_Metallic.png
+
+newmtl Material.015
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump Texture\\14\\None_Normal_OpenGL.png
+map_Ns Texture\\14\\None_Roughness.png
+refl Texture\\14\\None_Metallic.png
+
+newmtl glass
+Ns 359.999993
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

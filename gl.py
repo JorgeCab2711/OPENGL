@@ -3,9 +3,10 @@ from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 import numpy as np
 import pyrr
-import glfw
+import glm
 import glfw.GLFW as GLFW_CONSTANTS
 from PIL import Image
+from math import cos, sin, radians
 
 
 class Cube:
@@ -36,9 +37,22 @@ class App:
         glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
         glEnable(GL_DEPTH_TEST)
 
+        # selfer objs and texture
         self.wood_texture = Material(texture)
-
         self.cube = Cube(position, eulers)
+
+        # Camera
+        self.target = glm.vec3(0, 0, 0)
+        self.angle = 0
+        self.camDistance = 5
+        self.target.z = -5
+        self.deltaTime = 0.0
+        self.time = 0
+
+        # ViewMatrix
+        self.camPosition = glm.vec3(0, 0, 0)
+        self.camRotation = glm.vec3(0, 0, 0)
+        self.viewMatrix = self.getViewMatrix()
 
         projection_transform = pyrr.matrix44.create_perspective_projection(
             fovy=45, aspect=1080/720,
@@ -71,59 +85,82 @@ class App:
         arrow_Up = False
         arrow_left = False
         arrow_right = False
-
+        W_press = False
+        S_press = False
+        # Zoom Limits
+        self.zoomW, self.zoomS = -8.0, -1.0
         running = True
         while (running):
+
             # check events
             for event in pg.event.get():
                 # Key down for movement
                 if(event.type == pg.KEYDOWN):
                     if event.key == pg.K_DOWN:
                         arrow_down = True
-
                     if event.key == pg.K_UP:
                         arrow_Up = True
-
                     if event.key == pg.K_LEFT:
                         arrow_left = True
-
                     if event.key == pg.K_RIGHT:
                         arrow_right = True
+                    # Zoom in and zoom out
+                    if (event.key == pg.K_w):
+                        W_press = True
+                    if (event.key == pg.K_s):
+                        S_press = True
+                    # Model/Texture/Position Changing
+                    if event.key == pg.K_1:
+                        print("Please wait, loading model...")
+                        self.cube_mesh = Mesh("models\Tiger_.obj")
+                        self.wood_texture = Material("Textures\Tiger.png")
+                        self.cube = Cube([0, 0, -5], [0, 0, 0])
+                        print("Tiger Tank")
+                    if event.key == pg.K_2:
+                        print("Please wait, loading model...")
+                        self.cube_mesh = Mesh("models\mask.obj")
+                        self.wood_texture = Material("Textures\gold.jpg")
+                        self.cube = Cube([0, 0, -4], [0, 0, 0])
+                        print("Squid Games Mask")
+                    if event.key == pg.K_3:
+                        print("Please wait, loading model...")
+                        self.cube_mesh = Mesh("models\Gun.obj")
+                        self.wood_texture = Material("Textures\gray.jpg")
+                        self.cube = Cube([0, 0, -4], [0, 0, 0])
+                        print("Diamond Gun")
+                    if event.key == pg.K_4:
+                        print("Please wait, loading model...")
+                        self.cube_mesh = Mesh("models\mm.obj")
+                        self.wood_texture = Material("Textures\gold.jpg")
+                        self.cube = Cube([0, 0, -5], [0, 0, 0])
+                        print("Weird Hand")
+                    if event.key == pg.K_5:
+                        print("Please wait, loading model...")
+                        self.cube_mesh = Mesh("models\\toysoldier.obj")
+                        self.wood_texture = Material("Textures\green.jpg")
+                        self.cube = Cube([0, 0, -5], [0, 0, 0])
+                        print("American Flamethrower")
                 # key up for stoping movement
                 elif(event.type == pg.KEYUP):
                     if event.key == pg.K_DOWN:
                         arrow_down = False
-
                     if event.key == pg.K_UP:
                         arrow_Up = False
-
                     if event.key == pg.K_LEFT:
                         arrow_left = False
-
                     if event.key == pg.K_RIGHT:
                         arrow_right = False
-                if (event.type == pg.QUIT):
+                    # Zoom in and zoom out
+                    if event.key == pg.K_w:
+                        W_press = False
+                    if event.key == pg.K_s:
+                        S_press = False
+                elif (event.type == pg.QUIT):
                     running = False
 
-            if(arrow_down):
-                self.cube.eulers[0] -= 1
-            if(arrow_Up):
-                self.cube.eulers[0] += 1
-            if(arrow_left):
-                self.cube.eulers[2] += 1
-            if(arrow_right):
-                self.cube.eulers[2] -= 1
-
-            # reseting variables for memory efficiency
-            if self.cube.eulers[0] > 360 or self.cube.eulers[0] < -360:
-                self.cube.eulers[0] = 0
-            elif self.cube.eulers[2] > 360 or self.cube.eulers[2] < -360:
-                self.cube.eulers[2] = 0
-
-            # update cube
-            # self.cube.eulers[2] += 0.25
-            # if self.cube.eulers[2] > 360:
-            #     self.cube.eulers[2] -= 360
+            # handle arrow keys
+            self.handleKeys(arrow_down, arrow_Up,
+                            arrow_left, arrow_right, W_press, S_press)
 
             # refresh screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -153,7 +190,44 @@ class App:
 
             # timing
             self.clock.tick(60)
+
         self.quit()
+
+    def handleKeys(self, arrow_down, arrow_Up, arrow_left, arrow_right, W_pressed, S_pressed):
+        # todo: deltaTime
+        if(arrow_down):
+            self.cube.eulers[0] -= 1
+        elif(arrow_Up):
+            self.cube.eulers[0] += 1
+        if(arrow_left):
+            self.cube.eulers[2] += 1
+        if(arrow_right):
+            self.cube.eulers[2] -= 1
+        if(W_pressed and self.cube.position[2] < self.zoomS):
+            self.cube.position[2] += 1
+        if(S_pressed and self.cube.position[2] > self.zoomW):
+            self.cube.position[2] -= 1
+
+        self.deltaTime = self.clock.tick(60) / 1000
+        self.time += self.deltaTime
+
+    def getViewMatrix(self):
+        identity = glm.mat4(1)
+
+        translateMat = glm.translate(identity, self.camPosition)
+
+        pitch = glm.rotate(identity, glm.radians(
+            self.camRotation.x), glm.vec3(1, 0, 0))
+        yaw = glm.rotate(identity, glm.radians(
+            self.camRotation.y), glm.vec3(0, 1, 0))
+        roll = glm.rotate(identity, glm.radians(
+            self.camRotation.z), glm.vec3(0, 0, 1))
+
+        rotationMat = pitch * yaw * roll
+
+        camMatrix = translateMat * rotationMat
+
+        return glm.inverse(camMatrix)
 
     def quit(self):
         self.cube_mesh.destroy()
@@ -161,86 +235,6 @@ class App:
         glDeleteProgram(self.shader)
         pg.quit()
 
-
-class GraphicsEngine:
-
-    def __init__(self):
-
-        self.wood_texture = Material("gfx/wood.jpeg")
-        self.cube_mesh = Mesh("models/cube.obj")
-
-        # initialise opengl
-        glClearColor(0.1, 0.2, 0.2, 1)
-        self.shader = self.createShader(
-            "shaders/vertex.txt", "shaders/fragment.txt")
-        glUseProgram(self.shader)
-        glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
-        glEnable(GL_DEPTH_TEST)
-
-        projection_transform = pyrr.matrix44.create_perspective_projection(
-            fovy=45, aspect=640/480,
-            near=0.1, far=10, dtype=np.float32
-        )
-        glUniformMatrix4fv(
-            glGetUniformLocation(self.shader, "projection"),
-            1, GL_FALSE, projection_transform
-        )
-        self.modelMatrixLocation = glGetUniformLocation(self.shader, "model")
-        self.viewMatrixLocation = glGetUniformLocation(self.shader, "view")
-
-    def createShader(self, vertexFilepath, fragmentFilepath):
-
-        with open(vertexFilepath, 'r') as f:
-            vertex_src = f.readlines()
-
-        with open(fragmentFilepath, 'r') as f:
-            fragment_src = f.readlines()
-
-        shader = compileProgram(compileShader(vertex_src, GL_VERTEX_SHADER),
-                                compileShader(fragment_src, GL_FRAGMENT_SHADER))
-
-        return shader
-
-    def render(self, scene):
-
-        # refresh screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glUseProgram(self.shader)
-
-        view_transform = pyrr.matrix44.create_look_at(
-            eye=scene.player.position,
-            target=scene.player.position + scene.player.forwards,
-            up=scene.player.up, dtype=np.float32
-        )
-        glUniformMatrix4fv(self.viewMatrixLocation, 1,
-                           GL_FALSE, view_transform)
-
-        self.wood_texture.use()
-        glBindVertexArray(self.cube_mesh.vao)
-        for cube in scene.cubes:
-            model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
-            model_transform = pyrr.matrix44.multiply(
-                m1=model_transform,
-                m2=pyrr.matrix44.create_from_eulers(
-                    eulers=np.radians(cube.eulers), dtype=np.float32
-                )
-            )
-            model_transform = pyrr.matrix44.multiply(
-                m1=model_transform,
-                m2=pyrr.matrix44.create_from_translation(
-                    vec=np.array(cube.position), dtype=np.float32
-                )
-            )
-            glUniformMatrix4fv(self.modelMatrixLocation, 1,
-                               GL_FALSE, model_transform)
-            glDrawArrays(GL_TRIANGLES, 0, self.cube_mesh.vertex_count)
-
-        glFlush()
-
-    def quit(self):
-        self.cube_mesh.destroy()
-        self.wood_texture.destroy()
-        glDeleteProgram(self.shader)
 
 # returns the vertices
 
@@ -438,50 +432,9 @@ class Scene:
         self.player.update_vectors()
 
 
-def menu():
-    position = [0, 0, -10]
-    eulers = [0, 0, 0]
-
-    model = ""
-    texture = ""
-
-    print(
-        "Modelos: \n[1] TIGER_TANK \n[2] Mask \n[3] Soldier \n[4] Gun\n[5] Hand")
-    model_option = int(input("Seleccione el modelo que desea cargar: \n"))
-    if model_option == 1:
-        model = "models\Tiger_.obj"
-        texture = "Textures\Tiger.png"
-        position = [0, -1, -8]
-
-    elif model_option == 2:
-        model = "models\mask.obj"
-        texture = "Textures\gold.jpg"
-        position = [0, -1, -4]
-
-    elif model_option == 3:
-        model = "models\\toysoldier.obj"
-        texture = "Textures\green.jpg"
-        position = [0, -0.5, -2]
-
-    elif model_option == 4:
-        model = "models\Gun.obj"
-        texture = "Textures\gray.jpg"
-        position = [0, 0, -1]
-
-    elif model_option == 5:
-        model = "models\hand_mod.obj"
-        texture = "Textures\gray.jpg"
-        position = [0, 0, -10]
-
-    App(model, texture, position, eulers)
-
-
-# position = [0, -0.2, -4]
-# eulers = [0, 0, 0]
-
-# model = "models\\toysoldier.obj"
-# texture = "models\Texture\gold.jpg"
-
-
-# myApp = App(model, texture, position, eulers)
-menu()
+model = "models\\toysoldier.obj"
+texture = "Textures\gold.jpg"
+pos = [0, 0, -5]
+eulers = [0, 0, 0]
+print("Change OBJ by pressing any number from 1 to 6 : ")
+App(model, texture, pos, eulers)
