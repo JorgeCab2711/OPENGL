@@ -26,13 +26,14 @@ class App:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK,
                                     pg.GL_CONTEXT_PROFILE_CORE)
-        pg.display.set_mode((1080, 720), pg.OPENGL | pg.DOUBLEBUF)
+        self.window = pg.display.set_mode(
+            (1080, 720), pg.OPENGL | pg.DOUBLEBUF)
         self.clock = pg.time.Clock()
         # initialise opengl
         glClearColor(0.1, 0.2, 0.2, 1)
         self.cube_mesh = Mesh(model)
         self.shader = self.createShader(
-            "Shaders/vertex.txt", "Shaders/fragment.txt")
+            "Shaders/vertex_original.glsl", "Shaders/fragment_original.glsl")
         glUseProgram(self.shader)
         glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
         glEnable(GL_DEPTH_TEST)
@@ -79,7 +80,6 @@ class App:
         return shader
 
     def mainLoop(self):
-
         # arrow variables for key bindings
         arrow_down = False
         arrow_Up = False
@@ -90,8 +90,10 @@ class App:
         # Zoom Limits
         self.zoomW, self.zoomS = -8.0, -1.0
         running = True
+        bg_img = pg.image.load('carentan.jpg')
+        bg_img = pg.transform.scale(bg_img, (1080, 720))
         while (running):
-
+            self.window.blit(bg_img, (0, 0))
             # check events
             for event in pg.event.get():
                 # Key down for movement
@@ -119,13 +121,13 @@ class App:
                     if event.key == pg.K_2:
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\mask.obj")
-                        self.wood_texture = Material("Textures\gold.jpg")
+                        self.wood_texture = Material("Textures\gray.jpg")
                         self.cube = Cube([0, 0, -4], [0, 0, 0])
                         print("Squid Games Mask")
                     if event.key == pg.K_3:
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\Gun.obj")
-                        self.wood_texture = Material("Textures\gray.jpg")
+                        self.wood_texture = Material("Textures\Gun.png")
                         self.cube = Cube([0, 0, -4], [0, 0, 0])
                         print("Diamond Gun")
                     if event.key == pg.K_4:
@@ -137,7 +139,7 @@ class App:
                     if event.key == pg.K_5:
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\\toysoldier.obj")
-                        self.wood_texture = Material("Textures\green.jpg")
+                        self.wood_texture = Material("Textures\\toy.jpg")
                         self.cube = Cube([0, 0, -5], [0, 0, 0])
                         print("American Flamethrower")
                 # key up for stoping movement
@@ -155,6 +157,17 @@ class App:
                         W_press = False
                     if event.key == pg.K_s:
                         S_press = False
+                # Mouse wheel events
+                elif event.type == pg.MOUSEWHEEL:
+                    if (event.y > 0 and self.cube.position[2] < self.zoomS):
+                        self.cube.position[2] += 1
+                    elif event.y < 0 and self.cube.position[2] > self.zoomW:
+                        self.cube.position[2] -= 1
+
+                    # print(event)
+                    # print(event.x, event.y)
+                    # can access properties with
+                    # proper notation(ex: event.y)
                 elif (event.type == pg.QUIT):
                     running = False
 
@@ -258,6 +271,10 @@ class Mesh:
         # texture
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                              32, ctypes.c_void_p(12))
+        # normal
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
                               32, ctypes.c_void_p(20))
 
     def loadMesh(self, filename):
@@ -353,7 +370,7 @@ class Material:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         image = pg.image.load(filepath).convert()
         image_width, image_height = image.get_rect().size
-        img_data = pg.image.tostring(image, 'RGBA')
+        img_data = pg.image.tostring(image, 'RGBA', True)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width,
                      image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
         glGenerateMipmap(GL_TEXTURE_2D)
