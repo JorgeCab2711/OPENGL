@@ -7,6 +7,7 @@ import glm
 import glfw.GLFW as GLFW_CONSTANTS
 from PIL import Image
 from math import cos, sin, radians
+from pygame import mixer
 
 
 class Cube:
@@ -18,10 +19,12 @@ class Cube:
 
 
 class App:
-    # Model OBJ, texture IMAGE FORMAT ,  position [x,y,z], eulers/rotation [x,y,z]
+    # Model OBJ, texture IMAGE FORMAT , camera position [x,y,z], eulers/rotation [x,y,z]
     def __init__(self, model: str, texture: str, position, eulers):
         # initialise pygame
         pg.init()
+        mixer.init()
+        mixer.music.load('Erika.mp3')
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK,
@@ -64,6 +67,7 @@ class App:
             1, GL_FALSE, projection_transform
         )
         self.modelMatrixLocation = glGetUniformLocation(self.shader, "model")
+        mixer.music.play()
         self.mainLoop()
 
     def createShader(self, vertexFilepath, fragmentFilepath):
@@ -87,12 +91,22 @@ class App:
         arrow_right = False
         W_press = False
         S_press = False
+        eventStarted = False
         # Zoom Limits
-        self.zoomW, self.zoomS = -8.0, -1.0
+        self.zoomW, self.zoomS = -6.0, -1.0
+        volume = 0.5
         running = True
         bg_img = pg.image.load('carentan.jpg')
         bg_img = pg.transform.scale(bg_img, (1080, 720))
+
         while (running):
+            # Music volume
+            mixer.music.set_volume(volume)
+            if volume >= 1.0:
+                volume = 1.0
+            elif volume < 0.0:
+                volume = 0.0
+            # Background
             self.window.blit(bg_img, (0, 0))
             # check events
             for event in pg.event.get():
@@ -114,34 +128,46 @@ class App:
                     # Model/Texture/Position Changing
                     if event.key == pg.K_1:
                         print("Please wait, loading model...")
+                        eventStarted = True
                         self.cube_mesh = Mesh("models\Tiger_.obj")
                         self.wood_texture = Material("Textures\Tiger.png")
                         self.cube = Cube([0, 0, -5], [0, 0, 0])
                         print("Tiger Tank")
                     if event.key == pg.K_2:
+                        eventStarted = True
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\mask.obj")
                         self.wood_texture = Material("Textures\gray.jpg")
                         self.cube = Cube([0, 0, -4], [0, 0, 0])
                         print("Squid Games Mask")
                     if event.key == pg.K_3:
+                        eventStarted = True
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\Gun.obj")
                         self.wood_texture = Material("Textures\Gun.png")
                         self.cube = Cube([0, 0, -4], [0, 0, 0])
                         print("Diamond Gun")
                     if event.key == pg.K_4:
+                        eventStarted = True
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\mm.obj")
                         self.wood_texture = Material("Textures\gold.jpg")
                         self.cube = Cube([0, 0, -5], [0, 0, 0])
                         print("Weird Hand")
                     if event.key == pg.K_5:
+                        eventStarted = True
                         print("Please wait, loading model...")
                         self.cube_mesh = Mesh("models\\toysoldier.obj")
                         self.wood_texture = Material("Textures\\toy.jpg")
                         self.cube = Cube([0, 0, -5], [0, 0, 0])
                         print("American Flamethrower")
+                    # volume handling
+                    if event.key == pg.K_l:
+                        volume += 0.1
+
+                    if event.key == pg.K_k:
+                        volume -= 0.1
+
                 # key up for stoping movement
                 elif(event.type == pg.KEYUP):
                     if event.key == pg.K_DOWN:
@@ -157,8 +183,13 @@ class App:
                         W_press = False
                     if event.key == pg.K_s:
                         S_press = False
-                # Mouse wheel events
-                elif event.type == pg.MOUSEWHEEL:
+                    # pause and resume music
+                    if event.key == pg.K_p:
+                        mixer.music.pause()
+                    if event.key == pg.K_o:
+                        mixer.music.unpause()
+
+                elif event.type == pg.MOUSEWHEEL and eventStarted:
                     if (event.y > 0 and self.cube.position[2] < self.zoomS):
                         self.cube.position[2] += 1
                     elif event.y < 0 and self.cube.position[2] > self.zoomW:
@@ -173,7 +204,7 @@ class App:
 
             # handle arrow keys
             self.handleKeys(arrow_down, arrow_Up,
-                            arrow_left, arrow_right, W_press, S_press)
+                            arrow_left, arrow_right, W_press, S_press, eventStarted)
 
             # refresh screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -206,20 +237,20 @@ class App:
 
         self.quit()
 
-    def handleKeys(self, arrow_down, arrow_Up, arrow_left, arrow_right, W_pressed, S_pressed):
-        # todo: deltaTime
-        if(arrow_down):
-            self.cube.eulers[0] -= 1
-        elif(arrow_Up):
-            self.cube.eulers[0] += 1
-        if(arrow_left):
-            self.cube.eulers[2] += 1
-        if(arrow_right):
-            self.cube.eulers[2] -= 1
-        if(W_pressed and self.cube.position[2] < self.zoomS):
-            self.cube.position[2] += 1
-        if(S_pressed and self.cube.position[2] > self.zoomW):
-            self.cube.position[2] -= 1
+    def handleKeys(self, arrow_down, arrow_Up, arrow_left, arrow_right, W_pressed, S_pressed, eventStarted: bool):
+        if eventStarted:
+            if(arrow_down):
+                self.cube.eulers[0] -= 1
+            elif(arrow_Up):
+                self.cube.eulers[0] += 1
+            elif(arrow_left):
+                self.cube.eulers[2] += 1
+            elif(arrow_right):
+                self.cube.eulers[2] -= 1
+            elif(W_pressed and self.cube.position[2] < self.zoomS):
+                self.cube.position[2] += 1
+            elif(S_pressed and self.cube.position[2] > self.zoomW):
+                self.cube.position[2] -= 1
 
         self.deltaTime = self.clock.tick(60) / 1000
         self.time += self.deltaTime
@@ -449,9 +480,11 @@ class Scene:
         self.player.update_vectors()
 
 
-model = "models\\toysoldier.obj"
+model = "models\\Text.obj"
 texture = "Textures\gold.jpg"
-pos = [0, 0, -5]
+pos = [0, 0, -8]
 eulers = [0, 0, 0]
-print("Change OBJ by pressing any number from 1 to 6 : ")
+print(
+    "INSTRUCTIONS:\n->Controls \n  -Change OBJ by pressing any number from 1 to 6 (Not KeyPad)\n  -Use the scroll wheel to zoom in and out\n  -Use Arrows to rotate the camera around object\n->MUSIC\n  -Pause the music by pressing [P]\n  -Resume the music by pressing [r]\n  -Use [k] and [L] for lowering and increasing the volume")
+
 App(model, texture, pos, eulers)
